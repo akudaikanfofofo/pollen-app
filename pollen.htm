@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>今日のスギ花粉情報</title>
+
+  <style>
+    body {
+      font-family: "Meiryo", sans-serif;
+      margin: 20px;
+      padding: 0;
+      background-color: #f7fff7;
+    }
+    h1 {
+      color: #2a7f62;
+      text-align: center;
+    }
+    #pollen-box {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      max-width: 400px;
+      margin: 20px auto;
+      text-align: center;
+      font-size: 1.2rem;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>今日の憎きスギ花粉情報</h1>
+
+  <div id="pollen-box">
+    読み込み中…
+  </div>
+
+<script>
+async function loadPollen() {
+  // CSV ファイル名（同じフォルダに置く）
+  const url = "pollen_14108_20250301_20250331.csv";
+
+  const response = await fetch(url);
+  const csvText = await response.text();
+
+  // CSV を行ごとに分割
+  const lines = csvText.trim().split("\n");
+
+  // 1行目はヘッダーなので除外
+  const dataLines = lines.slice(1);
+
+  // ★ 表示したい日付（2025年3月1日）
+  const targetDate = "2025-03-01";
+
+  // 指定日のデータだけ抽出
+  const dayData = dataLines
+    .map(line => {
+      const [citycode, date, pollen] = line.split(",");
+      return { date, pollen: Number(pollen) };
+    })
+    .filter(row => row.date.startsWith(targetDate));
+
+  const box = document.getElementById("pollen-box");
+
+  if (dayData.length === 0) {
+    box.textContent = "指定日のデータがありません";
+    return;
+  }
+
+  // 1日の合計花粉量を計算
+  const total = dayData.reduce((sum, row) => sum + row.pollen, 0);
+
+  box.textContent = `${targetDate} のスギ花粉：${total} 個/m³`;
+}
+
+loadPollen();
+</script>
+
+
+</body>
+</html>
