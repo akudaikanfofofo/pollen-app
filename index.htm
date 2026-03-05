@@ -41,8 +41,8 @@ async function loadPollen() {
   const box = document.getElementById("pollen-box");
 
   try {
-    // ★ 試験用：東京都千代田区の観測地点ID
-    const url = `curl 'https://wxtech.weathernews.com/opendata/v1/pollen?citycode=13101&start=20260301&end=20260305'`;
+    // ★ はなこさん：横浜市金沢区 富岡観測所
+    const url = "https://www.env.go.jp/air/osen/hanako/data/xml/14108010.xml";
 
     const response = await fetch(url);
     if (!response.ok) {
@@ -50,13 +50,15 @@ async function loadPollen() {
       return;
     }
 
-    const data = await response.json();
+    const xmlText = await response.text();
+    const parser = new DOMParser();
+    const xml = parser.parseFromString(xmlText, "application/xml");
 
-    // API の返す JSON 例：
-    // { "pollen": 23, "time": "2026-03-05T12:00:00+09:00", ... }
+    const dailyList = xml.querySelectorAll("daily");
+    const latest = dailyList[dailyList.length - 1];
 
-    const pollen = data.pollen;
-    const time = data.time;
+    const time = latest.querySelector("time").textContent;
+    const pollen = latest.querySelector("pollen").textContent;
 
     box.textContent = `最新のスギ花粉：${pollen} 個/m³（${time} 時点）`;
 
@@ -68,9 +70,9 @@ async function loadPollen() {
 loadPollen();
 </script>
 
-
 </body>
 
 </html>
+
 
 
