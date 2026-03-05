@@ -42,8 +42,7 @@ async function loadPollen() {
 
   try {
     // ★ 試験用：東京都千代田区の観測地点ID
-    const id = "13101";
-    const url = `https://wxtech.weathernews.com/opendata/pollen/v1/point/${id}.json`;
+    const url = `curl 'https://wxtech.weathernews.com/opendata/v1/pollen?citycode=13101&start=20260301&end=20260305'`;
 
     const response = await fetch(url);
     if (!response.ok) {
@@ -73,4 +72,5 @@ loadPollen();
 </body>
 
 </html>
+
 
