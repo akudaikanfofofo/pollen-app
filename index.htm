@@ -41,26 +41,33 @@ async function loadPollen() {
   const box = document.getElementById("pollen-box");
 
   try {
-    // ★ はなこさん：横浜市金沢区 富岡観測所
-    const url = "https://www.env.go.jp/air/osen/hanako/data/xml/14108010.xml";
-
+    // ★ GitHub Pages の同じフォルダにある CSV を読み込む
+    const url = "pollen_14108_20250301_20250331.csv";
     const response = await fetch(url);
+
     if (!response.ok) {
-      box.textContent = "花粉データを取得できませんでした";
+      box.textContent = "CSV を読み込めませんでした";
       return;
     }
 
-    const xmlText = await response.text();
-    const parser = new DOMParser();
-    const xml = parser.parseFromString(xmlText, "application/xml");
+    const text = await response.text();
+    const lines = text.trim().split("\n");
 
-    const dailyList = xml.querySelectorAll("daily");
-    const latest = dailyList[dailyList.length - 1];
+    // 1行目はヘッダー
+    const dataLines = lines.slice(1);
 
-    const time = latest.querySelector("time").textContent;
-    const pollen = latest.querySelector("pollen").textContent;
+    let total = 0;
 
-    box.textContent = `最新のスギ花粉：${pollen} 個/m³（${time} 時点）`;
+    for (const line of dataLines) {
+      const [citycode, dateStr, pollenStr] = line.split(",");
+
+      // 2025-03-01 のデータだけ合計する
+      if (dateStr.startsWith("2025-03-01")) {
+        total += Number(pollenStr);
+      }
+    }
+
+    box.textContent = `2025年3月1日の花粉量の合計：${total} 個/m³`;
 
   } catch (e) {
     box.textContent = "エラー：" + e.message;
@@ -73,6 +80,7 @@ loadPollen();
 </body>
 
 </html>
+
 
 
 
